@@ -1,0 +1,18 @@
+HTML FILES{
+    top_nav
+    index
+    select
+    add
+    edit
+}
+
+DATABASE {
+    Employee{
+        name
+        phone
+        login name
+        salary
+        date employed
+        password
+    }
+}

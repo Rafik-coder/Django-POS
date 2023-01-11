@@ -1,0 +1,149 @@
+{% load static %}
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> {% if page_title %}
+    <title>{{ page_title }} | Grocery Point Of Sale System</title>
+    {% else %}
+    <title>POS</title>
+    {% endif %}
+    <link rel="stylesheet" type="text/css" href="{% static 'store/css/bootstrap.css' %}" />
+</head>
+<style>
+    body{
+        width: 100vw;
+        height: 100vh;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+
+    body::-webkit-scrollbar{
+        width: 4px
+    }
+
+    .no-scrollbar::-webkit-scrollbar{
+        width: 0px
+    }
+
+    .main{
+        width: 100%;
+        height: calc(100% - 60px);
+        padding: 8px;
+        gap: 5px;
+        margin: 0px;
+        justify-content: center;
+    }
+</style>
+<body>
+    <div class="container-fluid p-0 m-0 w-100 h-100">
+        {% block TopNav %}{% include "store/top_nav.html" %}{% endblock %}
+        <div class="row main">
+            <!--    SELECTION        -->
+            <div class="col-sm-12 col-md-6 col-xl-6  p-2 ">
+                <div class="row p-1">
+                    <div class="col-12" style="height: 50px">
+<!--                            <input id="search" type="text" class="form-control" placeholder="search by Name">-->
+                        <form id="live-search" action="" class="row" method="GET">
+
+                            <div class="col-8">
+<!--                                    <h1>Live Search</h1>-->
+                                <input type="text" name="search" class="form-control col-8" placeholder="search" />
+
+                            </div>
+                            <div class="col-4">
+                                <input type="submit" value="search" class="btn col-4 bg-primary">
+
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-12 no-scrollbar border" style="overflow-y: scroll; height: calc(100%-48px)">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">NAME</th>
+                                    <th scope="col">PRICE</th>
+                                    <th scope="col">STOCK</th>
+                                    <th scope="col">CATEGORY</th>
+                                    <th scope="col">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for product in products %}
+                                <tr>
+                                    <td>{{ product.name }}</td>
+                                    <td>GH{{ product.price }}</td>
+                                    <td>{{ product.stock }}</td>
+                                    <td>{{ product.category_id }}</td>
+                                    <td>
+                                        <!-- <a href="" id="sell" class="btn btn-outline-primary sell">SELL</a> -->
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                            CHOOSE
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!--    SELECTED        -->
+            <div class="col-sm-12 col-md-5 p-2 col-xl-5 " style="align-items: center">
+                <div class="row p-1">
+                    <div class="col-12" style="height: 50px">
+                        <div class="d-flex" style="gap: 3px">
+                            <input type="text" class="form-control w-75" placeholder="" disabled value="">
+                            <input type="number" class="form-control w-25" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="col-12 no-scrollbar border" style="overflow-y: scroll; height: calc(100%-48px)">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">NAME</th>
+                                    <th scope="col">PRICE</th>
+                                    <th scope="col">STOCK</th>
+                                    <th scope="col">BRAND</th>
+                                    <th scope="col">SELL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Adam</td>
+                                    <td>GH10.5</td>
+                                    <td>20</td>
+                                    <td>Head Aech</td>
+                                    <td>
+                                        <!-- <a href="" id="sell" class="btn btn-outline-primary sell">SELL</a> -->
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                            CHOOSE
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+
+<!--        var on_search = document.getElementById('search')-->
+
+<!--        on_search.addEventListener('keyup', function(){-->
+<!--            {{ search }} = on_search.value-->
+
+<!--        })-->
+
+
+<!--        if ({{ alert }}){-->
+<!--            alert('No Product Matched')-->
+<!--        }-->
+    </script>
+    <script src="{% static 'store/js/bootstrap.bundle.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+{% load static %}
+{% load selection %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> {% if page_title %}
+    <title>{{ page_title }} | Grocery Point Of Sale System</title>
+    {% else %}
+    <title>POS</title>
+    {% endif %}
+    <link rel="stylesheet" type="text/css" href="{% static 'store/css/bootstrap.css' %}" />
+    <script src="{% static 'store/jquery/jquery.js' %}"></script>
+<!--    <script src="{% static 'store/pos.js' %}"></script>-->
+</head>
+<style>
+    body{
+        width: 100vw;
+        height: 100vh;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+
+    body::-webkit-scrollbar{
+        width: 4px
+    }
+
+    .no-scrollbar::-webkit-scrollbar{
+        width: 0px
+    }
+
+    .main{
+        width: 100%;
+        height: calc(100% - 60px);
+        padding: 8px;
+        gap: 5px;
+        margin: 0px;
+        justify-content: center;
+    }
+</style>
+<body>
+    <div class="container-fluid p-0 m-0 w-100 h-100">
+        {% block TopNav %}{% include "store/top_nav.html" %}{% endblock %}
+        <div class="row main">
+            <!--    SELECTION        -->
+            <div class="col-sm-12 col-md-6 col-xl-6  p-2 ">
+                <div class="row p-1">
+                    <div class="col-12" style="height: 50px">
+<!--                            <input id="search" type="text" class="form-control" placeholder="search by Name">-->
+                        <form id="form" action="{% url 'store:pos' %}" class="row" method="GET">
+
+                            <div class="col-12">
+                                <input type="search" value="{{ search }}" id="search" name="search" class="form-control col-8" placeholder="Live search by Name of Product" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-12 no-scrollbar border" style="overflow-y: scroll; height: calc(100%-48px)">
+                        <table class="table table-hover product-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">NAME</th>
+                                    <th scope="col">PRICE</th>
+                                    <th scope="col">STOCK</th>
+                                    <th scope="col">CATEGORY</th>
+                                    <th scope="col">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for product in products %}
+                                <tr>
+                                    <td>{{ product.name }}</td>
+                                    <td>GH {{ product.price }}</td>
+                                    <td>{{ product.stock }}</td>
+                                    <td>{{ product.category_id }}</td>
+                                    <td>
+                                        <!-- <a href="" id="sell" class="btn btn-outline-primary sell">SELL</a> -->
+                                        <button onclick="selected('{{product.name}}', '{{product.price}}', '{{product.stock}}')" type="button" class="btn btn-primary">
+                                            CHOOSE
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        <div class="modal fade" style="height: 550px;" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content modal-dialog-scrollable">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Check Out</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body no-scrollbar">
+                                        <center>
+                                            <div class="card shadow">
+                                                <div class="card-body">
+                                                    <p><b>Product : </b><i id="p_name"></i></p>
+                                                    <p><b>In Stock : </b><i id="p_stock"></i></p>
+                                                    <p><b>Unit Price : </b><i id="p_price"></i></p>
+                                                </div>
+                                                <div>
+                                                    <p><b>Enter Qnt. : </b><input style="border: 1px solid grey;outline:none" type="number"></p>
+                                                </div>
+                                                <div>
+                                                    <p><b>PRICE : </b><span style="color: green;">GHC 60.00</span></p>
+                                                </div>
+                                            </div>
+                                        </center>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-primary">ADD</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--    SELECTED        -->
+            <div class="col-sm-12 col-md-5 p-2 col-xl-5 " style="align-items: center">
+                <div class="row p-1">
+                    <div class="col-12" style="height: 50px">
+                        <div class="d-flex" style="gap: 3px">
+                            <input id="selected_p" type="text" class="form-control w-75" placeholder="" disabled value="">
+                            <input id="qnt" step="1" type="number" min="0" class="form-control w-25" disabled placeholder="QNT">
+                            <button id="add" class="btn bg-secondary" disabled>Add</button>
+                        </div>
+                    </div>
+                    <div class="col-12 no-scrollbar border" style="overflow-y: scroll; height: calc(100%-48px)">
+                        <table class="table table-hover selected-product-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">QNTY</th>
+                                    <th scope="col">NAME</th>
+                                    <th scope="col">SUB PRICE</th>
+                                    <th scope="col">EDIT</th>
+                                    <th scope="col">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for product in selected %}
+                                <tr>
+                                    <td>{{product.qnt}}</td>
+                                    <td>{{product.name}}</td>
+                                    <td>GHC {{product.price}}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    var p_name = document.getElementById('p_name');
+    var p_qnt = document.getElementById('qnt');
+    var add_p = document.getElementById('add');
+    var edit_product = document.getElementById('edit');
+    var remove_p = document.getElementById('remove');
+    var p_selected = document.getElementById('selected_p');
+    var p_price = document.getElementById('p_price');
+
+    var on_search = document.getElementById('search');
+    var form = document.querySelector('#form')
+    var search = on_search.value;
+    on_search.selectionEnd = search.length
+    on_search.focus()
+
+    on_search.addEventListener('input', function(event){
+
+        // setTimeout(function(){
+        // form.submit()}, 200)
+
+        $.ajax({
+          type: 'POST',
+          url: 'pos',
+          data: {
+            'search': search,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function(data) {
+            // Response succeeds
+            ProductsTable(data.products);
+            console.log(data)
+          }
+        });
+
+    })
+
+
+function ProductsTable(products) {
+      // clear the existing rows from the table
+      $('.product-table tbody').empty();
+
+      // loop through the products and create a new row for each product
+      products.forEach(product => {
+        const row = $('<tr>');
+
+        // creating cells for each piece of data and adding them to the row
+
+        const nameCell = $('<td>').text(product.name);
+        row.append(nameCell);
+
+        const priceCell = $('<td>').text('GHC ' + product.price);
+        row.append(priceCell);
+
+        const qntCell = $('<td>').text(product.stock);
+        row.append(qntCell);
+
+        const catCell = $('<td>').text(product.category_id);
+        row.append(catCell);
+
+        const choose_tb = $('<td>')
+        const choose = $('<button id="edit" onclick="edit(23, product.name, 60)" type="button" class="btn btn-primary">CHOOSE</button>')
+        choose_tb.append(choose);
+        row.append(choose_tb)
+
+// <!--        const remove_td = $('<td></td>')-->
+// <!--        const remove_p2 = $('<button id="remove" type="button" class="btn btn-primary">REMOVE</button>').click(delete_p(product.name))-->
+// <!--        remove_td.append(remove_p2);-->
+// <!--        row.append(remove_td);-->
+
+        // add the row to the table
+        $('.product-table tbody').append(row);
+      });
+    }
+
+    function selected(name, price, stock){
+        p_qnt.value = ''
+        add_p.disabled = true
+
+        p_selected.value = name
+        p_qnt.disabled = false
+
+        p_qnt.max = stock
+
+        console.log(stock)
+
+    };
+
+    function edit(name, qnt, stock){
+        p_selected.value = name
+        p_qnt.value = qnt
+        p_qnt.disabled = false
+        add_p.disabled = false
+        p_qnt.max = stock
+
+        console.log(stock)
+    };
+
+    p_qnt.addEventListener("input", function(event){
+        if ((p_qnt.value == 0) || (p_qnt.value.includes('.'))){
+            add_p.disabled = true
+        } else{
+            add_p.disabled = false
+
+        }
+
+    });
+
+    p_qnt.addEventListener("input", function(event){
+        if (((parseInt(p_qnt.value)) > this.max) || (parseInt(p_qnt.value) < 0)) {
+        add_p.disabled = true
+      }
+    });
+
+
+    function delete_p(name){
+
+        $.ajax({
+          type: 'POST',
+          url: 'pos/p_selected_delete',
+          data: {
+            'p_name': name,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function(data) {
+            // Response succeeds
+            console.log("deleted");
+            updateTable(data.products);
+          }
+        });
+    };
+
+    add_p.addEventListener("click", function(event){
+
+        $.ajax({
+          type: 'POST',
+          url: 'pos/p_selected',
+          data: {
+            'p_name': p_selected.value,
+            'p_qnt': p_qnt.value,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function(data) {
+            // Response succeeds
+            console.log("sent");
+            updateTable(data.products);
+          }
+        });
+
+        p_qnt.value = '';
+        p_selected.value = '';
+
+    })
+
+
+function updateTable(products) {
+      // clear the existing rows from the table
+      $('.selected-product-table tbody').empty();
+
+      // loop through the products and create a new row for each product
+      products.forEach(product => {
+        const row = $('<tr>');
+
+        // creating cells for each piece of data and adding them to the row
+
+        const qntCell = $('<td>').text(product.qnt);
+        row.append(qntCell);
+
+        const nameCell = $('<td>').text(product.name);
+        row.append(nameCell);
+
+        const priceCell = $('<td>').text('GHC ' + product.price);
+        row.append(priceCell);
+
+        const edit_td = $('<td>')
+        const edit_p = $('<button id="edit" onclick="edit(23, product.name, 60)" type="button" class="btn btn-primary">EDIT</button>')
+        edit_td.append(edit_p);
+        row.append(edit_td)
+
+// <!--        const remove_td = $('<td></td>')-->
+// <!--        const remove_p2 = $('<button id="remove" type="button" class="btn btn-primary">REMOVE</button>').click(delete_p(product.name))-->
+// <!--        remove_td.append(remove_p2);-->
+// <!--        row.append(remove_td);-->
+
+        // add the row to the table
+        $('.selected-product-table tbody').append(row);
+      });
+    }
+
+    </script>
+    <script src="{% static 'store/js/bootstrap.bundle.js' %}"></script>
+</body>
+</html>
